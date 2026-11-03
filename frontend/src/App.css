@@ -143,6 +143,22 @@ button:focus-visible,
   outline-offset: 4px;
 }
 
+/* Round icon button between the two fields. flex: none keeps it a fixed
+   circle while the inputs on either side stretch. */
+.swap {
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  margin-bottom: 0.15rem;
+  border: 1px solid rgba(244, 242, 234, 0.4);
+  border-radius: 50%;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.swap:hover {
+  background: rgba(244, 242, 234, 0.12);
+}
+
 .form-footer {
   display: flex;
   justify-content: space-between;
@@ -152,10 +168,22 @@ button:focus-visible,
   padding-top: 0.4rem;
 }
 
+/* Clear and Get Directions sit together as one group, so the secondary
+   action is always next to the primary one. */
 .actions {
   display: flex;
   align-items: center;
   gap: 1.4rem;
+}
+/* Same quiet uppercase style as the toggles, so Clear reads as secondary. */
+.actions .secondary {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+}
+.actions .secondary:hover {
+  opacity: 1;
 }
 .actions .primary {
   display: inline-flex;
@@ -334,6 +362,11 @@ td.num {
   .fields {
     flex-direction: column;
     align-items: stretch;
+  }
+  /* Fields are stacked here, so turn the ⇄ arrow to point up/down. */
+  .swap {
+    align-self: center;
+    transform: rotate(90deg);
   }
   .form-footer {
     flex-direction: column;

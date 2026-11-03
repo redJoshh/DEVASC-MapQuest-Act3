@@ -6,7 +6,8 @@ import DirectionsTable from "./components/DirectionsTable";
 import "./App.css";
 
 // Top-level state: the current route, any alert message and a loading flag.
-// It lives here, not in the form, because the results area needs it too.
+// It lives here, not in the form, because the results area reads it and the
+// form's Clear button must be able to reset it.
 export default function App() {
   const [route, setRoute] = useState(null);
   const [alert, setAlert] = useState(null); // { text, level: 'error' | 'warning' }
@@ -31,6 +32,13 @@ export default function App() {
     }
   }
 
+  // Called by the form's Clear button: remove the old results and any alert,
+  // so the page goes back to its empty starting state.
+  function handleClear() {
+    setRoute(null);
+    setAlert(null);
+  }
+
   return (
     <div className="page">
       <section className="hero">
@@ -39,7 +47,11 @@ export default function App() {
         </header>
 
         <div className="hero-panel">
-          <RouteForm loading={loading} onSearch={handleSearch} />
+          <RouteForm
+            loading={loading}
+            onSearch={handleSearch}
+            onClear={handleClear}
+          />
         </div>
       </section>
 
