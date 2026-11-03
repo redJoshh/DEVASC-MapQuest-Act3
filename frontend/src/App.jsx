@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { fetchRoute } from "./api";
 import RouteForm from "./components/RouteForm";
+import UnitToggle from "./components/UnitToggle";
 import TripSummary from "./components/TripSummary";
 import DirectionsTable from "./components/DirectionsTable";
 import "./App.css";
 
+// Top-level state: the current route, any alert message, loading flag, and units.
+// It lives here, not in the form, because the results area needs it too.
 // Top-level state: the current route, any alert message and a loading flag.
 // It lives here, not in the form, because the results area reads it and the
 // form's Clear button must be able to reset it.
@@ -12,9 +15,9 @@ export default function App() {
   const [route, setRoute] = useState(null);
   const [alert, setAlert] = useState(null); // { text, level: 'error' | 'warning' }
   const [loading, setLoading] = useState(false);
-  // Fixed to kilometres for now, matching the lab's metric-only output.
-  // The unit-toggle branch turns this into state the user can change.
-  const metric = true; // true = km, false = miles
+  // Units are display-only state: switching re-renders the converted numbers
+  // and never triggers a new request. Defaults to km, like the lab's output.
+  const [metric, setMetric] = useState(true); // true = km, false = miles
 
   async function handleSearch(orig, dest) {
     // Reset first, so an old route or error never shows next to a new search.
@@ -53,6 +56,18 @@ export default function App() {
             onClear={handleClear}
           />
         </div>
+
+        {/* The unit switch sits in the hero, not in the results, so it can be
+            set before searching and stays in the same place on every search. */}
+        <aside className="hero-tab">
+          <span className="tab-icon" aria-hidden="true">
+            &#8597;
+          </span>
+          <div>
+            <span className="tab-title">Units</span>
+            <UnitToggle metric={metric} onChange={setMetric} />
+          </div>
+        </aside>
       </section>
 
       {/* Render the results area only when there is something to show, so an

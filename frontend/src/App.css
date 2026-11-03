@@ -168,6 +168,34 @@ button:focus-visible,
   padding-top: 0.4rem;
 }
 
+/* Text toggles (route type + units): uppercase labels, underline on active. */
+/* Shared class, so every option switch in the app looks and behaves the same. */
+.toggle {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+.toggle button {
+  padding: 0.2rem 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+  /* A transparent border reserves the space, so the text doesn't jump when
+     the underline appears on the active option. */
+  border-bottom: 1px solid transparent;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s;
+}
+.toggle button:hover {
+  opacity: 1;
+}
+.toggle button.active {
+  opacity: 1;
+  border-bottom-color: currentColor;
+}
+
 /* Clear and Get Directions sit together as one group, so the secondary
    action is always next to the primary one. */
 .actions {
@@ -200,6 +228,45 @@ button:focus-visible,
 /* :not(:disabled) so the arrow doesn't suggest "go" while a request is loading. */
 .actions .primary:hover:not(:disabled) .arrow {
   transform: translateX(4px);
+}
+
+/* ---------- Bottom-right tab (units) ---------- */
+/* Its width is var(--tab-w), the same space .hero-panel already leaves free,
+   so the tab and the form strip never overlap. */
+.hero-tab {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.4rem 2.4rem 1.4rem 1.4rem;
+  width: var(--tab-w);
+  background: var(--tab);
+  color: var(--cream);
+}
+
+.tab-icon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid rgba(244, 242, 234, 0.6);
+  border-radius: 50%;
+  font-size: 0.95rem;
+}
+
+.tab-title {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.hero-tab .toggle {
+  gap: 0.9rem;
 }
 
 /* ---------- Results ---------- */
@@ -332,6 +399,13 @@ td.num {
   .hero {
     --tab-w: 210px;
   }
+  /* A narrower tab: drop the decorative icon so the toggle still fits. */
+  .hero-tab {
+    padding: 1.2rem 1.4rem;
+  }
+  .tab-icon {
+    display: none;
+  }
 }
 
 /* Below 900px there isn't room for absolute positioning, so the hero
@@ -352,6 +426,10 @@ td.num {
     left: auto;
     transform: none;
     width: 100%;
+  }
+  .hero-tab {
+    position: relative;
+    width: auto;
   }
 }
 
