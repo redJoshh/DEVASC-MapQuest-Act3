@@ -7,8 +7,6 @@ import DirectionsTable from "./components/DirectionsTable";
 import "./App.css";
 
 // Top-level state: the current route, any alert message, loading flag, and units.
-// It lives here, not in the form, because the results area needs it too.
-// Top-level state: the current route, any alert message and a loading flag.
 // It lives here, not in the form, because the results area reads it and the
 // form's Clear button must be able to reset it.
 export default function App() {
