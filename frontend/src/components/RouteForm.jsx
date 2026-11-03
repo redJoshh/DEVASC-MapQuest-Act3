@@ -1,12 +1,13 @@
 import { useState } from "react";
 
-// Start/destination inputs with empty-field validation (Test Case 3).
+// Start/destination inputs with empty-field validation (Test Case 3),
+// plus swap and clear buttons.
 // Validating here, before any request, gives instant feedback and saves a
 // round trip. The backend still checks too (code 611), because a client-side
 // check can always be bypassed.
-export default function RouteForm({ loading, onSearch }) {
+export default function RouteForm({ loading, onSearch, onClear }) {
   // Controlled inputs: React state is the single source of truth, so the
-  // values can be validated, trimmed and (later) swapped or cleared.
+  // values can be validated, trimmed, swapped and cleared.
   const [orig, setOrig] = useState("");
   const [dest, setDest] = useState("");
   // One flag per field, so only the empty field gets the red border.
@@ -20,6 +21,22 @@ export default function RouteForm({ loading, onSearch }) {
     setFieldError(errs);
     if (errs.orig || errs.dest) return; // nothing is sent to the backend
     onSearch(orig.trim(), dest.trim());
+  }
+
+  // Swap only exchanges the text. It doesn't search, so the user can still
+  // edit before submitting, and an accidental click costs no API call.
+  function handleSwap() {
+    setOrig(dest);
+    setDest(orig);
+  }
+
+  // Reset the form's own state, then tell App to drop the results and alert.
+  // Those live in App, so the form can't clear them itself.
+  function handleClear() {
+    setOrig("");
+    setDest("");
+    setFieldError({ orig: false, dest: false });
+    onClear();
   }
 
   return (
@@ -46,6 +63,18 @@ export default function RouteForm({ loading, onSearch }) {
           </span>
         </label>
 
+        {/* type="button" so clicking it doesn't submit the form. The arrow
+            glyph has no visible text, so aria-label names it for screen readers. */}
+        <button
+          type="button"
+          className="swap"
+          onClick={handleSwap}
+          title="Swap locations"
+          aria-label="Swap locations"
+        >
+          &#8644;
+        </button>
+
         <label className="field">
           <span className="field-index">02</span>
           <span className="field-body">
@@ -71,6 +100,11 @@ export default function RouteForm({ loading, onSearch }) {
 
       <div className="form-footer">
         <div className="actions">
+          {/* Secondary style: clearing is less common than searching, so it
+              shouldn't compete with the main button. */}
+          <button type="button" className="secondary" onClick={handleClear}>
+            Clear
+          </button>
           {/* Disabled while loading so a double click can't send duplicate
               requests, and the label shows that something is happening. */}
           <button type="submit" className="primary" disabled={loading}>
