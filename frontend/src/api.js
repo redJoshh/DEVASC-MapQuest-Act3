@@ -16,9 +16,9 @@ function fail(text, level = "error") {
   return err;
 }
 
-export async function fetchRoute(orig, dest) {
+export async function fetchRoute(orig, dest, routeType) {
   // URLSearchParams encodes commas and spaces in place names ("Washington, DC").
-  const params = new URLSearchParams({ from: orig, to: dest });
+  const params = new URLSearchParams({ from: orig, to: dest, routeType });
 
   // A relative URL, so the Vite dev proxy forwards it to Flask. No CORS is
   // needed, and no backend host is hard-coded in the frontend.
