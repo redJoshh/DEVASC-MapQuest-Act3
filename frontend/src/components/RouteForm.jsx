@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { ROUTE_TYPES, DEFAULT_ROUTE_TYPE } from "../routeTypes";
 
 // Start/destination inputs with empty-field validation (Test Case 3),
-// plus swap and clear buttons.
+// a route type picker, plus swap and clear buttons.
 // Validating here, before any request, gives instant feedback and saves a
 // round trip. The backend still checks too (code 611), because a client-side
 // check can always be bypassed.
@@ -10,6 +11,9 @@ export default function RouteForm({ loading, onSearch, onClear }) {
   // values can be validated, trimmed, swapped and cleared.
   const [orig, setOrig] = useState("");
   const [dest, setDest] = useState("");
+  // Kept in the form because it's part of what is being submitted, like the
+  // two locations.
+  const [routeType, setRouteType] = useState(DEFAULT_ROUTE_TYPE);
   // One flag per field, so only the empty field gets the red border.
   const [fieldError, setFieldError] = useState({ orig: false, dest: false });
 
@@ -20,7 +24,7 @@ export default function RouteForm({ loading, onSearch, onClear }) {
     const errs = { orig: !orig.trim(), dest: !dest.trim() };
     setFieldError(errs);
     if (errs.orig || errs.dest) return; // nothing is sent to the backend
-    onSearch(orig.trim(), dest.trim());
+    onSearch(orig.trim(), dest.trim(), routeType);
   }
 
   // Swap only exchanges the text. It doesn't search, so the user can still
@@ -35,6 +39,8 @@ export default function RouteForm({ loading, onSearch, onClear }) {
   function handleClear() {
     setOrig("");
     setDest("");
+    // Clear means a full reset, so the route type goes back to the default too.
+    setRouteType(DEFAULT_ROUTE_TYPE);
     setFieldError({ orig: false, dest: false });
     onClear();
   }
@@ -99,6 +105,22 @@ export default function RouteForm({ loading, onSearch, onClear }) {
       )}
 
       <div className="form-footer">
+        {/* Buttons rather than a <select>: only four options, all visible at
+            once, and the same .toggle style as the units switch. */}
+        <div className="toggle route-type" role="group" aria-label="Route type">
+          {ROUTE_TYPES.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              className={routeType === t.value ? "active" : ""}
+              aria-pressed={routeType === t.value}
+              onClick={() => setRouteType(t.value)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
         <div className="actions">
           {/* Secondary style: clearing is less common than searching, so it
               shouldn't compete with the main button. */}

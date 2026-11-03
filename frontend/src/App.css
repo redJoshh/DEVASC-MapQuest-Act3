@@ -23,6 +23,14 @@
   z-index: 1;
 }
 
+.byline {
+  margin: -1.2rem 0 0; /* tuck up into the wordmark's descender space */
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  color: var(--cream);
+  opacity: 0.85;
+}
+
 .wordmark {
   margin: 0;
   font-weight: 300;
@@ -35,6 +43,21 @@
   color: var(--cream);
   z-index: 1;
   user-select: none;
+}
+
+/* Sits above the form strip on the right, filling the empty space; z-index
+   keeps it over the wordmark on mid-size screens. */
+.tagline {
+  position: absolute;
+  top: 54%;
+  right: 19%;
+  margin: 0;
+  max-width: 22rem;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  z-index: 3;
 }
 
 /* ---------- Route form (dark strip) ---------- */
@@ -420,6 +443,15 @@ td.num {
     position: relative;
     top: auto;
     padding: 2.5rem 1rem 0;
+  }
+  .byline {
+    margin-top: -0.3rem;
+  }
+  .tagline {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 1rem 1.5rem 4rem;
   }
   .hero-panel {
     position: relative;

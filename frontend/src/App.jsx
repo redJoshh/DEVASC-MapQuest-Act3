@@ -17,13 +17,13 @@ export default function App() {
   // and never triggers a new request. Defaults to km, like the lab's output.
   const [metric, setMetric] = useState(true); // true = km, false = miles
 
-  async function handleSearch(orig, dest) {
+  async function handleSearch(orig, dest, routeType) {
     // Reset first, so an old route or error never shows next to a new search.
     setAlert(null);
     setRoute(null);
     setLoading(true);
     try {
-      setRoute(await fetchRoute(orig, dest));
+      setRoute(await fetchRoute(orig, dest, routeType));
     } catch (err) {
       // api.js already turned every failure into a user-facing message and level.
       setAlert({ text: err.message, level: err.level || "error" });
@@ -45,7 +45,16 @@ export default function App() {
       <section className="hero">
         <header className="masthead">
           <h1 className="wordmark">ROUTE</h1>
+          <p className="byline">by: Atienza, Cabillo, Mortiz, Naguimbing</p>
         </header>
+
+        {/* <br /> fixes where the line breaks, so the two-line tagline
+            reads the same at every width. */}
+        <p className="tagline">
+          Find the way from where you are
+          <br />
+          to wherever you&rsquo;re headed.
+        </p>
 
         <div className="hero-panel">
           <RouteForm

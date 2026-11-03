@@ -1,7 +1,7 @@
 """
 MapQuest Directions API wrapper (Flask).
 
-GET /api/route?from=<start>&to=<destination>
+GET /api/route?from=<start>&to=<destination>&routeType=<fastest|shortest|pedestrian|bicycle>
 
 Keeps the lab's logic (statuscode 0 / 402 / 611 checks, maneuvers list) but
 returns JSON for the React frontend instead of printing to the console.
@@ -24,9 +24,14 @@ app = Flask(__name__)
 MAIN_API = 'https://www.mapquestapi.com/directions/v2/route'
 
 # Read once at startup. It may be None if .env is missing. We don't crash here,
-# so the server still starts and can later return a clear error message
+# so the server still starts and get_route() can return a clear error message
 # instead of a stack trace.
 KEY = os.getenv('MAPQUEST_KEY')
+
+# Route types MapQuest supports.
+# An allow-list: only these values are forwarded, so a typo or a crafted value
+# gets a clear 400 from us instead of an unclear error from MapQuest.
+ROUTE_TYPES = ('fastest', 'shortest', 'pedestrian', 'bicycle')
 
 # The lab handled 402 and 611 explicitly; everything else gets a generic message.
 # The wording is friendlier than the lab's console text because it is shown
@@ -43,6 +48,9 @@ def get_route():
     # blank field, instead of being sent to MapQuest as a "location".
     orig = request.args.get('from', '').strip()
     dest = request.args.get('to', '').strip()
+    # Optional, and case-insensitive. `or 'fastest'` also covers an empty
+    # ?routeType= so old clients that never send it keep working.
+    route_type = request.args.get('routeType', 'fastest').strip().lower() or 'fastest'
 
     # Missing input: stop before calling MapQuest at all (same idea as lab code 611).
     # This saves an API call and quota, and 400 tells the client that the
@@ -50,17 +58,41 @@ def get_route():
     if not orig or not dest:
         return jsonify(error=ERROR_MESSAGES[611], statuscode=611), 400
 
-    # One request only. The lab called requests.get twice for the same URL.
-    # A timeout keeps a slow MapQuest from hanging this worker forever.
-    resp = requests.get(
-        MAIN_API,
-        # requests URL-encodes this, so commas and spaces in place names are
-        # safe, and the key never appears in a URL we build or log ourselves.
-        params={'key': KEY, 'from': orig, 'to': dest},
-        timeout=10,
-    )
+    if route_type not in ROUTE_TYPES:
+        return jsonify(error=f'Invalid route type. Choose one of: {", ".join(ROUTE_TYPES)}.'), 400
 
-    data = resp.json()
+    # A server setup problem, not the user's fault: 500, and a message that
+    # says where to fix it. Checked before calling MapQuest, which would only
+    # answer with a vaguer error.
+    if not KEY:
+        return jsonify(error='Server is missing the MapQuest API key (check backend/.env).'), 500
+
+    try:
+        # One request only. The lab called requests.get twice for the same URL.
+        # A timeout keeps a slow MapQuest from hanging this worker forever.
+        resp = requests.get(
+            MAIN_API,
+            # requests URL-encodes this, so commas and spaces in place names are
+            # safe, and the key never appears in a URL we build or log ourselves.
+            params={'key': KEY, 'from': orig, 'to': dest, 'routeType': route_type},
+            timeout=10,
+        )
+    except requests.RequestException:
+        # DNS failure, no internet, timeout: an upstream problem, so 502 Bad
+        # Gateway, not a crash with Flask's HTML error page.
+        return jsonify(error='Could not reach MapQuest. Check your internet connection.'), 502
+
+    # A wrong or unapproved key comes back as HTTP 401/403 with plain text, not JSON.
+    # Without this check it would be misreported as "could not reach MapQuest".
+    if resp.status_code in (401, 403):
+        return jsonify(error='MapQuest rejected the API key. Check MAPQUEST_KEY in backend/.env.'), 500
+
+    # Any other non-JSON reply (an outage page, a proxy error) still gets a
+    # JSON error, so the frontend can always read response.error.
+    try:
+        data = resp.json()
+    except ValueError:
+        return jsonify(error=f'MapQuest sent an unexpected response (HTTP {resp.status_code}).'), 502
 
     # MapQuest reports problems inside the JSON body (often with HTTP 200), so
     # info.statuscode, not the HTTP status, tells us whether a route was found.
@@ -79,6 +111,9 @@ def get_route():
     return jsonify(
         origin=orig,
         destination=dest,
+        # Echoed back so the UI shows the type that was actually used
+        # (including the 'fastest' default).
+        route_type=route_type,
         duration=route.get('formattedTime', 'N/A'),
         distance_miles=route.get('distance', 0),
         maneuvers=[
