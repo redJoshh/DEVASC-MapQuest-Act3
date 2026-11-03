@@ -1,0 +1,243 @@
+/* ---------- Page & hero ---------- */
+.page {
+  padding: 16px;
+}
+
+/* The hero is the positioning context for the masthead and the form strip.
+   --tab-w reserves room for the units tab (added later) so the centered form
+   never has to be resized when the tab arrives. */
+.hero {
+  --tab-w: 260px;
+  position: relative;
+  overflow: hidden;
+  min-height: max(640px, calc(100svh - 32px));
+  background: var(--sage);
+}
+
+.masthead {
+  position: absolute;
+  top: 8%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 1;
+}
+
+.wordmark {
+  margin: 0;
+  font-weight: 300;
+  /* clamp() scales the wordmark with the viewport but keeps it readable on
+     phones and stops it from growing without limit on wide screens. */
+  font-size: clamp(5rem, 21vw, 19rem);
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-indent: 0.1em; /* balance trailing letter-spacing */
+  color: var(--cream);
+  z-index: 1;
+  user-select: none;
+}
+
+/* ---------- Route form (dark strip) ---------- */
+/* Centered horizontally; width leaves room for the units tab on both sides
+   so the two never overlap. */
+.hero-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(640px, calc(100% - 2 * var(--tab-w) - 48px));
+  z-index: 4;
+}
+
+.route-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.75rem 2rem 1.5rem;
+  background: rgba(38, 50, 41, 0.94);
+  color: var(--cream);
+  backdrop-filter: blur(4px);
+}
+
+.fields {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.field {
+  flex: 1;
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-end;
+  min-width: 0; /* lets long input text shrink instead of overflowing the row */
+}
+
+.field-index {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: rgba(244, 242, 234, 0.6);
+  padding-bottom: 0.55rem;
+}
+
+.field-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.field-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(244, 242, 234, 0.7);
+}
+
+.route-form input[type="text"] {
+  width: 100%;
+  padding: 0.45rem 0;
+  border: none;
+  border-bottom: 1px solid rgba(244, 242, 234, 0.35);
+  background: transparent;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.route-form input::placeholder {
+  color: rgba(244, 242, 234, 0.35);
+}
+.route-form input:focus {
+  border-bottom-color: var(--cream);
+}
+/* Red underline on the exact field that is empty, so the user knows which
+   one to fix without reading the message. */
+.route-form input.invalid {
+  border-bottom-color: #e39a8f;
+}
+
+.field-error {
+  margin: -0.3rem 0 0;
+  font-size: 0.85rem;
+  color: #f0b3a9;
+}
+
+/* Reset browser button styles once, so every button starts from the same
+   plain base and only adds what it needs. */
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Inputs have outline: none, so keyboard users need a visible focus ring. */
+button:focus-visible,
+.route-form input:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 0.4rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+.actions .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.actions .primary .arrow {
+  font-size: 1.1rem;
+  transition: transform 0.2s;
+}
+/* :not(:disabled) so the arrow doesn't suggest "go" while a request is loading. */
+.actions .primary:hover:not(:disabled) .arrow {
+  transform: translateX(4px);
+}
+
+/* ---------- Results ---------- */
+.results {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 4.5rem 1rem 5rem;
+}
+
+/* currentColor ties the left bar to the text colour, so each level only has
+   to set one colour. */
+.alert {
+  padding: 1rem 1.2rem;
+  border-left: 2px solid currentColor;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+}
+/* error = something failed; warning = the user can fix it (e.g. missing input). */
+.alert.error {
+  color: var(--error);
+}
+.alert.warning {
+  color: var(--warn);
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 1240px) {
+  .hero {
+    --tab-w: 210px;
+  }
+}
+
+/* Below 900px there isn't room for absolute positioning, so the hero
+   becomes a simple stacked column. */
+@media (max-width: 900px) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .masthead {
+    position: relative;
+    top: auto;
+    padding: 2.5rem 1rem 0;
+  }
+  .hero-panel {
+    position: relative;
+    left: auto;
+    transform: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .route-form {
+    padding: 1.5rem 1.25rem;
+  }
+  .fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .actions {
+    justify-content: space-between;
+  }
+}
