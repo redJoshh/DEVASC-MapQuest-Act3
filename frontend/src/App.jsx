@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { fetchRoute } from "./api";
 import RouteForm from "./components/RouteForm";
+import TripSummary from "./components/TripSummary";
+import DirectionsTable from "./components/DirectionsTable";
 import "./App.css";
 
 // Top-level state: the current route, any alert message and a loading flag.
@@ -9,6 +11,9 @@ export default function App() {
   const [route, setRoute] = useState(null);
   const [alert, setAlert] = useState(null); // { text, level: 'error' | 'warning' }
   const [loading, setLoading] = useState(false);
+  // Fixed to kilometres for now, matching the lab's metric-only output.
+  // The unit-toggle branch turns this into state the user can change.
+  const metric = true; // true = km, false = miles
 
   async function handleSearch(orig, dest) {
     // Reset first, so an old route or error never shows next to a new search.
@@ -49,12 +54,22 @@ export default function App() {
             </div>
           )}
 
-          {/* Temporary: proves the round trip works. Replaced by the trip
-              summary and directions table in the results-display branch. */}
+          {/* Both components get the same metric flag, so the summary and
+              the table always show the same unit. */}
           {route && (
-            <p>
-              Route found: {route.origin} &rarr; {route.destination}
-            </p>
+            <>
+              <div className="results-header">
+                <span className="eyebrow success">Route found</span>
+                {/* Echo the places the backend actually routed, so the user
+                    can see what was searched. */}
+                <h2>
+                  {route.origin} <span className="arrow">&rarr;</span>{" "}
+                  {route.destination}
+                </h2>
+              </div>
+              <TripSummary route={route} metric={metric} />
+              <DirectionsTable maneuvers={route.maneuvers} metric={metric} />
+            </>
           )}
         </section>
       )}
